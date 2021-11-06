@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.griffinrobotics.lib.command.Command;
-import com.griffinrobotics.lib.command.CommandScheduler;
-import com.griffinrobotics.lib.command.Component;
-import com.griffinrobotics.lib.hardware.Motor;
+import com.amarcolini.joos.command.Command;
+import com.amarcolini.joos.command.CommandScheduler;
+import com.amarcolini.joos.command.Component;
+import com.amarcolini.joos.hardware.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Lift implements Component {
@@ -16,6 +16,8 @@ public class Lift implements Component {
     }
 
     public void setLevel(int level) {
+        motor.setRunMode(Motor.RunMode.PositionControl);
+        motor.set(0.01);
         switch(Math.max(Math.min(level, 3), 1)) {
             case 1: {
                 motor.setTargetPosition(0);
@@ -25,7 +27,7 @@ public class Lift implements Component {
                 motor.setTargetPosition(10);
             }
             case 3: {
-                motor.setTargetPosition(20);
+                motor.setTargetPosition(-1115);
             }
         }
     }

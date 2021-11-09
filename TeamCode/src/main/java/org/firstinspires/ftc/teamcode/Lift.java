@@ -7,7 +7,7 @@ import com.amarcolini.joos.hardware.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Lift implements Component {
-    private Motor motor;
+    private final Motor motor;
 
     public Lift(Motor motor) {
         this.motor = motor;
@@ -42,7 +42,7 @@ public class Lift implements Component {
     }
 
     @Override
-    public void update(CommandScheduler commandScheduler) {
-        motor.update(commandScheduler);
+    public void update() {
+        motor.update();
     }
 }

@@ -46,7 +46,6 @@ public class Test extends LinearOpMode {
             lift.setTargetPosition(liftPosition);
             lift.set(liftSpeed);
             bucket.setPosition(bucketPosition);
-            lift.update(new CommandScheduler());
             telem.addData("bucket position", bucket.getPosition());
             telem.update();
         }

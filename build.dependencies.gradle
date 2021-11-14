@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:gameAssets-FreightFrenzy:1.0.0'
     implementation 'com.github.amarcolini.joos:command:master-SNAPSHOT'
     implementation 'com.github.amarcolini.joos:navigation:master-SNAPSHOT'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.3'
 }
 

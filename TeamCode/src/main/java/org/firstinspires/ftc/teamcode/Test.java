@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.amarcolini.joos.command.CommandScheduler;
+import com.amarcolini.joos.control.PIDCoefficients;
 import com.amarcolini.joos.hardware.Motor;
 import com.amarcolini.joos.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -23,6 +24,7 @@ public class Test extends LinearOpMode {
     public static double spinnerSpeed = 0.0;
     public static int liftPosition = 0;
     public static double liftSpeed = 0.1;
+    public static PIDCoefficients liftCoefficients = new PIDCoefficients(1.0);
     public static double bucketPosition = 0.0;
 
     @Override
@@ -36,6 +38,7 @@ public class Test extends LinearOpMode {
         
         lift.setRunMode(Motor.RunMode.PositionControl);
         lift.setTargetPosition(0);
+        lift.setPositionCoefficients(liftCoefficients);
 
         waitForStart();
 
@@ -43,10 +46,12 @@ public class Test extends LinearOpMode {
             intake.set(intakeSpeed);
             conveyor.set(conveyorSpeed);
             spinner.set(spinnerSpeed);
+            lift.setPositionCoefficients(liftCoefficients);
             lift.setTargetPosition(liftPosition);
             lift.set(liftSpeed);
             bucket.setPosition(bucketPosition);
             telem.addData("bucket position", bucket.getPosition());
+            telem.addData("lift position", lift.getCurrentPosition());
             telem.update();
         }
     }

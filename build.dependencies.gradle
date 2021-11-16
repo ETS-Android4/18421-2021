@@ -12,6 +12,10 @@ repositories {
     }
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 dependencies {
     implementation 'org.firstinspires.ftc:Inspection:7.0.0'
     implementation 'org.firstinspires.ftc:Blocks:7.0.0'
@@ -26,6 +30,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:gameAssets-FreightFrenzy:1.0.0'
     implementation 'com.github.amarcolini.joos:command:master-SNAPSHOT'
     implementation 'com.github.amarcolini.joos:navigation:master-SNAPSHOT'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.3'
 }
 

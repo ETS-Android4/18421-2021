@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.amarcolini.joos.command.Command;
 import com.amarcolini.joos.command.Robot;
 import com.amarcolini.joos.geometry.Pose2d;
+import com.amarcolini.joos.geometry.Vector2d;
 import com.amarcolini.joos.hardware.Motor;
 import com.amarcolini.joos.hardware.Servo;
 import com.amarcolini.joos.hardware.drive.TankDrive;
@@ -38,17 +39,26 @@ public class FedEx extends Robot {
         intake = new Intake(new Motor(hMap, "intake", 1620));
         conveyor = new Conveyor(new Motor(hMap, "conveyor", 1620));
 
-        register(lift, bucket, drive, spinner);
+        register(lift, bucket, drive, spinner, gamepad);
     }
 
     public void initTeleOp() {
-        schedule(Command.of(() -> drive.setDrivePower(new Pose2d(
-                gamepad.p1.getLeftStick().getX(), 0,
-                gamepad.p1.getLeftStick().getY()
-        ))).requires(drive).runUntil(false));
+        Command driveCommand = Command.of(() -> {
+            Vector2d stick = new Vector2d(
+                    gamepad.p1.getInternal().left_stick_x,
+                    gamepad.p1.getInternal().left_stick_y
+            );
+            telemetry.addData("stick", stick);
+            drive.setDrivePower(new Pose2d(
+                    stick.getX(), 0,
+                    stick.getY()
+            ));
+        }).requires(drive).runUntil(false);
+        schedule(driveCommand);
 
         map(gamepad.p1.a::justActivated, Command.select(() -> {
-            int newLevel = (int) MathUtil.wrap(lift.getLevel() + 1, 1, 3);
+            int newLevel = lift.getLevel() + 1;
+            if (newLevel > 3) newLevel = 1;
             return lift.setLevel(newLevel);
         }).requires(lift));
         map(() -> gamepad.p1.b.justActivated() && requiring(lift) == null, bucket::toggle);

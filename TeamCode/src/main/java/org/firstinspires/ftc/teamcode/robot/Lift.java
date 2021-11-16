@@ -7,6 +7,7 @@ import com.amarcolini.joos.command.Command;
 import com.amarcolini.joos.command.CommandScheduler;
 import com.amarcolini.joos.command.Component;
 import com.amarcolini.joos.command.FunctionalCommand;
+import com.amarcolini.joos.control.PIDCoefficients;
 import com.amarcolini.joos.hardware.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -20,6 +21,9 @@ public class Lift extends AbstractComponent {
     public Lift(Motor motor) {
         this.motor = motor;
         motor.setRunMode(Motor.RunMode.PositionControl);
+        motor.set(0.0);
+        motor.setPositionTolerance(1);
+        motor.setPositionCoefficients(new PIDCoefficients(0.3, 0.0, 0.1));
         motor.resetEncoder();
     }
 
@@ -57,6 +61,7 @@ public class Lift extends AbstractComponent {
         final CommandScheduler scheduler = getScheduler();
         if (scheduler != null)
         scheduler.cancel(scheduler.requiring(this));
+        motor.set(0.0);
     }
 
     public void reset() {

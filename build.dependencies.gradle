@@ -12,9 +12,9 @@ repositories {
     }
 }
 
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
+//configurations.all {
+//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
 
 dependencies {
     implementation 'org.firstinspires.ftc:Inspection:7.0.0'

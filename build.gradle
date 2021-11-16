@@ -8,6 +8,10 @@ configurations {
     doc { transitive false }
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 buildscript {
     ext.kotlin_version = "1.5.31"
 

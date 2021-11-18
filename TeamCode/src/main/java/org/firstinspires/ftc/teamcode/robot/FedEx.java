@@ -29,12 +29,15 @@ public class FedEx extends Robot {
     public FedEx(@NonNull OpMode opMode) {
         super(opMode);
 
-        lift = new Lift(new Motor(hMap, "lift", 312, 537.7));
+        lift = new Lift(new Motor(hMap, "lift", 312, 537.7), this);
         bucket = new Bucket(new Servo(hMap, "bucket"));
-        drive = new TankDrive(
-                new Motor(hMap, 312.0, "front_left", "back_left"),
-                new Motor(hMap, 312.0, "front_right", "back_right")
-        );
+        Motor left = new Motor(hMap, 312.0, "front_left", "back_left");
+        left.reversed(true);
+        left.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        Motor right = new Motor(hMap, 312.0, "front_right", "back_right");
+        right.reversed(true);
+        right.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        drive = new TankDrive(left, right);
         spinner = new Spinner(new Motor(hMap, "spinner", 1620));
         intake = new Intake(new Motor(hMap, "intake", 1620));
         conveyor = new Conveyor(new Motor(hMap, "conveyor", 1620));

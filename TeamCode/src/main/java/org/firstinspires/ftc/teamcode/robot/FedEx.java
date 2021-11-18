@@ -43,7 +43,7 @@ public class FedEx extends Robot {
     }
 
     public void initTeleOp() {
-        Command driveCommand = Command.of(() -> {
+        schedule(Command.of(() -> {
             Vector2d stick = new Vector2d(
                     gamepad.p1.getInternal().left_stick_x,
                     gamepad.p1.getInternal().left_stick_y
@@ -53,8 +53,7 @@ public class FedEx extends Robot {
                     stick.getX(), 0,
                     stick.getY()
             ));
-        }).requires(drive).runUntil(false);
-        schedule(driveCommand);
+        }).requires(drive).runUntil(false));
 
         map(gamepad.p1.a::justActivated, Command.select(() -> {
             int newLevel = lift.getLevel() + 1;

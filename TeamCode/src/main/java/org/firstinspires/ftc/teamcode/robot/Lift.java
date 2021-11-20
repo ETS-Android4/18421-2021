@@ -18,6 +18,8 @@ import java.util.Set;
 public class Lift extends AbstractComponent {
     private final Motor motor;
     private final Robot robot;
+    private final int min = -880;
+    private final int max = 0;
     private int level = 1;
 
     public Lift(Motor motor, Robot robot) {
@@ -25,8 +27,8 @@ public class Lift extends AbstractComponent {
         this.robot = robot;
         motor.setRunMode(Motor.RunMode.PositionControl);
         motor.set(0.0);
-        motor.setPositionTolerance(1);
-        motor.setPositionCoefficients(new PIDCoefficients(0.3, 0.0, 0.1));
+        motor.setPositionTolerance(50);
+        motor.setPositionCoefficients(new PIDCoefficients(0.5, 0, 0));
         motor.resetEncoder();
         motor.setTargetPosition(0);
     }
@@ -36,39 +38,38 @@ public class Lift extends AbstractComponent {
     }
 
     public Command setLevel(int newLevel) {
-        int newPosition = 0;
+        int newPosition = max;
         switch(Math.max(Math.min(newLevel, 3), 1)) {
             case 1: {
                 break;
             }
             case 2: {
-                newPosition = -600;
+                newPosition = min;
                 break;
             }
             case 3: {
-                newPosition = -1150;
+                newPosition = -400;
                 break;
             }
         }
         int finalNewPosition = newPosition;
-        motor.setTargetPosition(finalNewPosition);
-        return new FunctionalCommand(
-                () -> {},
-                () -> {
+        return Command.of(() -> {
+            motor.setTargetPosition(finalNewPosition);
             motor.setRunMode(Motor.RunMode.PositionControl);
             motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
             motor.set(0.01);
-            motor.setTargetPosition(finalNewPosition);
             motor.update();
-            robot.telemetry.addData("working", motor.getCurrentPosition());
-        },
-                (interrupted) -> {
-                    robot.telemetry.addData("worked?", Math.abs(motor.getCurrentPosition() - finalNewPosition) <= 2);
+        })
+                .runUntil(() -> {
+                    int actual = Math.max(Math.min(motor.getTargetPosition(), max), min);
+                    return Math.abs(actual - motor.getCurrentPosition()) <= 50;
+                })
+                .requires(this)
+                .isInterruptable(true)
+                .onEnd((command, interrupted) -> {
                     if (!interrupted) this.level = newLevel;
                     motor.set(0);
-                }, () -> false, false,
-                Collections.singleton(this)
-        );
+                });
     }
 
     public void stop() {

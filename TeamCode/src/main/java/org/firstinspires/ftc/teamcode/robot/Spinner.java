@@ -16,7 +16,7 @@ public class Spinner implements Component {
     }
 
     public void start() {
-        motor.set(1.0);
+        motor.set(0.3);
         isActive = true;
     }
 

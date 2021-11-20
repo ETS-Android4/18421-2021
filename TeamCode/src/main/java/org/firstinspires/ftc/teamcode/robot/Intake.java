@@ -9,7 +9,7 @@ public class Intake implements Component {
 
     public Intake(Motor motor) {
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
-        motor.reversed(true);
+        motor.setReversed(true);
         this.motor = motor;
     }
 

@@ -18,14 +18,16 @@ public class Test extends LinearOpMode {
     private Motor spinner;
     private Motor lift;
     private Servo bucket;
+    private Motor drive;
 
     public static double intakeSpeed = 0.0;
     public static double conveyorSpeed = 0.0;
     public static double spinnerSpeed = 0.0;
     public static int liftPosition = 0;
-    public static double liftSpeed = 0.1;
+    public static double liftSpeed = 0;
     public static PIDCoefficients liftCoefficients = new PIDCoefficients(1.0);
-    public static double bucketPosition = 0.0;
+    public static double bucketPosition = 1.0;
+    public static double driveSpeed = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -34,11 +36,13 @@ public class Test extends LinearOpMode {
         spinner = new Motor(hardwareMap, "spinner", 1620);
         lift = new Motor(hardwareMap, "lift", 312, 537.7);
         bucket = new Servo(hardwareMap, "bucket");
+        drive = new Motor(hardwareMap, 312, "front_left", "back_left", "front_right", "back_right");
         MultipleTelemetry telem = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
         
         lift.setRunMode(Motor.RunMode.PositionControl);
         lift.setTargetPosition(0);
         lift.setPositionCoefficients(liftCoefficients);
+        lift.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         waitForStart();
 
@@ -50,6 +54,7 @@ public class Test extends LinearOpMode {
             lift.setTargetPosition(liftPosition);
             lift.set(liftSpeed);
             bucket.setPosition(bucketPosition);
+            drive.set(driveSpeed);
             telem.addData("bucket position", bucket.getPosition());
             telem.addData("lift position", lift.getCurrentPosition());
             telem.update();

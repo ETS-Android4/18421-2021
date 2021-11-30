@@ -18,6 +18,6 @@ javafx {
 }
 
 dependencies {
-    implementation "com.github.amarcolini.joos:gui:0.1.1-alpha:all"
+    implementation "com.github.amarcolini.joos:gui:0.1.4-alpha:all"
 //    implementation "com.github.amarcolini.joos:navigation:master-SNAPSHOT"
 }

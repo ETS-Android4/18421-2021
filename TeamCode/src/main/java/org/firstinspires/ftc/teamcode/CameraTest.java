@@ -12,7 +12,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 @TeleOp(name = "Camera Test")
 public class CameraTest extends LinearOpMode {
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "webcam");
         OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName);
@@ -24,6 +24,8 @@ public class CameraTest extends LinearOpMode {
             @Override
             public void onOpened()
             {
+                webcam.setPipeline(new DuckDetector());
+                webcam.startStreaming(800, 600);
                 dashboard.startCameraStream(webcam, 60);
                 telemetry.addData("", "camera opened!");
                 telemetry.update();
@@ -35,5 +37,11 @@ public class CameraTest extends LinearOpMode {
                 telemetry.update();
             }
         });
+
+        waitForStart();
+
+        while(opModeIsActive()) {
+            sleep(500);
+        }
     }
 }

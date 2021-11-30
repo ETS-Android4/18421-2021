@@ -53,7 +53,7 @@ public class FedEx extends Robot {
             telemetry.addData("stick", stick);
             Pose2d vel = new Pose2d(
                     stick.getX(), 0,
-                    stick.getY()
+                    -stick.getY()
             ).times(2);
             telemetry.addData("power", TankKinematics.robotToWheelVelocities(vel, 1));
             drive.setDrivePower(vel);

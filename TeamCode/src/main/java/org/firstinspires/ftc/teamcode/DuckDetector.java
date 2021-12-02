@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.amarcolini.joos.geometry.Vector2d;
 
 import java.io.File;
@@ -31,9 +33,9 @@ public class DuckDetector extends OpenCvPipeline {
 	private final Mat hslThresholdOutput = new Mat();
 	private final Mat pointSelectionOutput = new Mat();
 	private Position position = Position.ONE;
-	public static Vector2d location1 = new Vector2d();
-	public static Vector2d location2 = new Vector2d();
-	public static Vector2d location3 = new Vector2d();
+	public static Point location1 = new Point(400, 750);
+	public static Point location2 = new Point(410, 370);
+	public static Point location3 = new Point(415, 30);
 	public static Mode mode = Mode.POINTS;
 
 	public enum Mode {
@@ -56,7 +58,7 @@ public class DuckDetector extends OpenCvPipeline {
 	 */
 	private void hslThreshold(Mat input, double[] hue, double[] sat, double[] lum,
 		Mat out) {
-		Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HLS);
+		Imgproc.cvtColor(input, out, Imgproc.COLOR_RGB2HLS);
 		Core.inRange(out, new Scalar(hue[0], lum[0], sat[0]),
 			new Scalar(hue[1], lum[1], sat[1]), out);
 	}
@@ -70,25 +72,27 @@ public class DuckDetector extends OpenCvPipeline {
 		double[] hslThresholdLuminance = {0.0, 255.0};
 		hslThreshold(input, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance, hslThresholdOutput);
 
+		// Remove noise:
+		Imgproc.erode(hslThresholdOutput, hslThresholdOutput, Imgproc.getStructuringElement(0, new Size(20, 20)));
+
 		// Find corresponding barcode location:
 		final Moments moments = Imgproc.moments(hslThresholdOutput);
 		final Vector2d duck = new Vector2d(
 				moments.m10 / moments.m00,
 				moments.m01 / moments.m00
 		);
-		final double d1 = duck.distTo(location1);
-		final double d2 = duck.distTo(location2);
-		final double d3 = duck.distTo(location3);
-		final double max = Collections.max(Arrays.asList(d1, d2, d3));
-		if (d1 == max) position = Position.ONE;
-		else if (d2 == max) position = Position.TWO;
-		else if (d3 == max) position = Position.THREE;
+		final double d1 = duck.distTo(new Vector2d(location1.x, location1.y));
+		final double d2 = duck.distTo(new Vector2d(location2.x, location2.y));
+		final double d3 = duck.distTo(new Vector2d(location3.x, location3.y));
+		if (d1 <= d2 && d1 <= d3) position = Position.ONE;
+		else if (d2 < d1 && d2 <= d3) position = Position.TWO;
+		else if (d3 < d1 && d3 < d2) position = Position.THREE;
 
 		// Draw locations:
-		pointSelectionOutput.setTo(input);
-		Imgproc.circle(pointSelectionOutput, new Point(location1.getX(), location1.getY()), 10, new Scalar(255, 0, 0));
-		Imgproc.circle(pointSelectionOutput, new Point(location2.getX(), location2.getY()), 10, new Scalar(0, 255, 0));
-		Imgproc.circle(pointSelectionOutput, new Point(location3.getX(), location3.getY()), 10, new Scalar(0, 0, 255));
+		input.copyTo(pointSelectionOutput);
+		Imgproc.circle(pointSelectionOutput, location1, 10, new Scalar(255, 0, 0));
+		Imgproc.circle(pointSelectionOutput, location2, 10, new Scalar(0, 255, 0));
+		Imgproc.circle(pointSelectionOutput, location3, 10, new Scalar(0, 0, 255));
 		Imgproc.circle(pointSelectionOutput, new Point(duck.getX(), duck.getY()), 15, new Scalar(255, 255, 255), 3);
 
 		switch (mode) {

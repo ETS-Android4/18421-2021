@@ -93,10 +93,10 @@ public class FedEx extends Robot {
             schedule(Command.select(() -> {
                 final Command move = drive.followTrajectory(
                         drive.trajectoryBuilder(
-                                new Pose2d(-38.64, 62.14, -1.57080),
+                                drive.getPoseEstimate(),
                                 0.0
                         )
-                                .splineTo(new Vector2d(-14.26, 43.73), Math.toRadians(-90.0))
+                                .splineTo(new Vector2d(-14.26, 43.73), Math.toRadians(90.0))
                                 .build()
                 );
                 final Vector2d warehouse = new Vector2d(40.84, 41.03);

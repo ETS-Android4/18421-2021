@@ -17,15 +17,17 @@ public class CameraTest extends LinearOpMode {
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "webcam");
         OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName);
 
-        telemetry.addData("", "loading camera...");
-        telemetry.update();
+        dashboard.getTelemetry().addData("", "loading camera...");
+        dashboard.getTelemetry().update();
+
+        DuckDetector detector = new DuckDetector();
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened()
             {
-                webcam.setPipeline(new DuckDetector());
                 webcam.startStreaming(800, 600);
+                webcam.setPipeline(detector);
                 dashboard.startCameraStream(webcam, 60);
                 telemetry.addData("", "camera opened!");
                 telemetry.update();
@@ -41,7 +43,9 @@ public class CameraTest extends LinearOpMode {
         waitForStart();
 
         while(opModeIsActive()) {
-            sleep(500);
+            sleep(100);
+            dashboard.getTelemetry().addData("position", detector.getLastPosition());
+            dashboard.getTelemetry().update();
         }
     }
 }

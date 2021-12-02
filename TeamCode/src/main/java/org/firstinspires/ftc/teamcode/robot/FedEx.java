@@ -12,6 +12,7 @@ import com.amarcolini.joos.hardware.Motor;
 import com.amarcolini.joos.hardware.Servo;
 import com.amarcolini.joos.hardware.drive.TankDrive;
 import com.amarcolini.joos.kinematics.TankKinematics;
+import com.amarcolini.joos.trajectory.config.TankConstraints;
 import com.amarcolini.joos.util.MathUtil;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -26,6 +27,7 @@ public class FedEx extends Robot {
     public final Conveyor conveyor;
     public final Bucket bucket;
     public final TankDrive drive;
+    public final Camera camera;
 
     public FedEx(@NonNull OpMode opMode) {
         super(opMode);
@@ -36,10 +38,21 @@ public class FedEx extends Robot {
         left.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         Motor right = new Motor(hMap, 312.0, "front_right", "back_right");
         right.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        drive = new TankDrive(left, right);
+        drive = new TankDrive(
+                left, right, null,
+                new TankConstraints(
+                        left.getMaxRPM(),
+                        18.0,
+                        30.0,
+                        30.0,
+                        Math.toRadians(90.0),
+                        Math.toRadians(100.0)
+                )
+        );
         spinner = new Spinner(new Motor(hMap, "spinner", 1620));
         intake = new Intake(new Motor(hMap, "intake", 1620));
         conveyor = new Conveyor(new Motor(hMap, "conveyor", 1620));
+        camera = new Camera("webcam", this);
 
         register(lift, bucket, drive, spinner, intake, conveyor, gamepad);
     }
@@ -70,5 +83,44 @@ public class FedEx extends Robot {
             conveyor.toggle();
         });
         map(gamepad.p1.y::justActivated, spinner::toggle);
+    }
+
+    public void initAuto() {
+        camera.start();
+
+        schedule(Command.of(() -> {
+            camera.close();
+            schedule(Command.select(() -> {
+                final Command move = drive.followTrajectory(
+                        drive.trajectoryBuilder(
+                                new Pose2d(-38.64, 62.14, -1.57080),
+                                0.0
+                        )
+                                .splineTo(new Vector2d(-14.26, 43.73), Math.toRadians(-90.0))
+                                .build()
+                );
+                final Vector2d warehouse = new Vector2d(40.84, 41.03);
+                switch(camera.getLastPosition()) {
+                    case TWO:
+                        return move.then(lift.setLevel(2)).then(bucket::open).then(Command.select(() -> drive.followTrajectory(
+                                drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                                .splineTo(warehouse, 0.0)
+                                .build()
+                        )));
+                    case THREE:
+                        return move.then(lift.setLevel(3)).then(bucket::open).then(Command.select(() -> drive.followTrajectory(
+                                drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                                        .splineTo(warehouse, 0.0)
+                                        .build()
+                        )));
+                    default:
+                        return move.then(lift.setLevel(1)).then(bucket::open).then(Command.select(() -> drive.followTrajectory(
+                                drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                                        .splineTo(warehouse, 0.0)
+                                        .build()
+                        )));
+                }
+            }));
+        }));
     }
 }

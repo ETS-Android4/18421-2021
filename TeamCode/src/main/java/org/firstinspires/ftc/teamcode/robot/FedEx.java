@@ -2,18 +2,31 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.amarcolini.joos.command.Command;
 import com.amarcolini.joos.command.Robot;
+import com.amarcolini.joos.command.WaitCommand;
+import com.amarcolini.joos.control.FeedforwardCoefficients;
+import com.amarcolini.joos.control.PIDCoefficients;
+import com.amarcolini.joos.drive.DriveSignal;
+import com.amarcolini.joos.followers.TankPIDVAFollower;
+import com.amarcolini.joos.followers.TrajectoryFollower;
 import com.amarcolini.joos.geometry.Pose2d;
 import com.amarcolini.joos.geometry.Vector2d;
 import com.amarcolini.joos.hardware.Motor;
 import com.amarcolini.joos.hardware.Servo;
 import com.amarcolini.joos.hardware.drive.TankDrive;
 import com.amarcolini.joos.kinematics.TankKinematics;
+import com.amarcolini.joos.trajectory.Trajectory;
 import com.amarcolini.joos.trajectory.config.TankConstraints;
 import com.amarcolini.joos.util.DashboardUtil;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import java.util.Arrays;
 
 @Config
 public class FedEx extends Robot {
@@ -25,6 +38,9 @@ public class FedEx extends Robot {
     public final TankDrive drive;
     public final Camera camera;
 
+    private final Motor left;
+    private final Motor right;
+
     //Config variables:
     /*
     If you're having trouble visualizing the positions or dashboard isn't displaying these properly,
@@ -33,11 +49,12 @@ public class FedEx extends Robot {
     Additionally, there is a joos_testing module in the code, if you want to try out the GUI. It might not work.
      */
     public static Pose2d start = new Pose2d(-39.00, 62.40, -1.57080);
-    public static Double bucketOpenDuration = 0.5;
+    public static Double bucketOpenDuration = 2.0;
     public static Double spinnerSpinningDuration = 2.0;
     public static Vector2d shippingHubSpot = new Vector2d(-13.95, 42.80);
     public static Vector2d warehouseSpot = new Vector2d(46.85, 37.85);
     public static Vector2d carouselSpot = new Vector2d(-54.85, 52.30);
+    public static Double trackWidth = 14.0;
 
     public FedEx(@NonNull OpMode opMode) {
         super(opMode);
@@ -46,10 +63,22 @@ public class FedEx extends Robot {
         lift = new Lift(new Motor(hMap, "lift", 435, 384.5), this);
         bucket = new Bucket(new Servo(hMap, "bucket"));
         //Motors left and right both have a wheel radius set to 2.0 inches. Fix that if necessary.
-        Motor left = new Motor(hMap, 312.0, 2.0, 1.0, "front_left", "back_left");
+        left = new Motor(hMap, 312.0, 537.7, 2.5, 1.0, "front_left", "back_left");
         left.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        Motor right = new Motor(hMap, 312.0, 2.0, 1.0, "front_right", "back_right");
+        left.setRunMode(Motor.RunMode.RawPower);
+        left.setFeedforwardCoefficients(new FeedforwardCoefficients(0, 0, 0));
+        left.setVeloCoefficients(new PIDCoefficients(0, 0, 0));
+        left.getEncoder().setDistancePerPulse((2 * 2 * Math.PI * 1.0) / left.getCPR());
+        DcMotor backRight = hMap.get(DcMotor.class, "back_right");
+        DcMotor frontRight = hMap.get(DcMotor.class, "front_right");
+        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        right = new Motor(312.0, 537.7, 2.5, 1.0, backRight, frontRight);
         right.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        right.setRunMode(Motor.RunMode.RawPower);
+        right.setFeedforwardCoefficients(new FeedforwardCoefficients(0, 0 ,0));
+        right.setVeloCoefficients(new PIDCoefficients(0, 0, 0));
+        right.getEncoder().setDistancePerPulse((2 * 2 * Math.PI * 1.0) / right.getCPR());
         //Drive constants are in here, so if trajectory following / location is off, look here
         /*
         These constants are the kind that roadrunner uses, but we haven't gone through the process
@@ -58,14 +87,14 @@ public class FedEx extends Robot {
         if the trajectory following doesn't seem to be correcting itself too well, but the default values should be okay.
          */
         drive = new TankDrive(
-                left, right, null,
+                right, left, null,
                 new TankConstraints(
                         left.getMaxRPM(),
-                        18.0,
+                        trackWidth,
                         30.0,
                         30.0,
-                        Math.toRadians(90.0),
-                        Math.toRadians(100.0)
+                        Math.toRadians(180.0),
+                        Math.toRadians(180.0)
                 )
         );
         spinner = new Spinner(new Motor(hMap, "spinner", 1620));
@@ -109,14 +138,16 @@ public class FedEx extends Robot {
         camera.start();
         //Setting pose estimate
         drive.setPoseEstimate(start);
-        getPacket().addLine("This opmode is a test autonomous.");
-        getPacket().addLine("The robot should be against the wall behind the barcode nearest to the " +
+        TelemetryPacket packet = new TelemetryPacket();
+        telemetry.addLine("This opmode is a test autonomous.");
+        telemetry.addLine("The robot should be against the wall behind the barcode nearest to the " +
                 "carousel and aligned on the nearest field tile. The camera should be facing the barcode");
-        getPacket().addLine("The robot should drive to the carousel, activate the spinner (if it's the wrong direction, " +
+        telemetry.addLine("The robot should drive to the carousel, activate the spinner (if it's the wrong direction, " +
                 "reverse the spinner), drive to the shipping hub, drop the freight, and drive into the warehouse." +
                 "There should be dashboard variables to tweak these values.");
-        DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate());
-        dashboard.sendTelemetryPacket(getPacket());
+        telemetry.update();
+        DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+        dashboard.sendTelemetryPacket(packet);
 
         //If spinner needs reversing:
 //        spinner.reversed = true;
@@ -141,34 +172,98 @@ public class FedEx extends Robot {
                     default: level = 3;
                     break;
                 }
+
                 getPacket().addLine("duck position: " + level);
                 //Go to carousel
-                return drive.followTrajectory(drive.trajectoryBuilder()
-                        .splineTo(carouselSpot, Math.toRadians(180.0))
-                        .build()
-                )
-                        //Spin spinner
-                        .then(spinner::start)
-                        .wait(spinnerSpinningDuration)
-                        .then(spinner::stop)
-                        //Go to shipping hub
-                        .then(drive.followTrajectory(drive.trajectoryBuilder()
-                                .back(26.322604207555816)
-                                .splineTo(shippingHubSpot, Math.toRadians(-90.0))
-                                .build()
-                        ))
-                        //Drop freight
-                        .then(lift.setLevel(level))
-                        .then(bucket::open)
-                        .wait(bucketOpenDuration)
-                        .then(bucket::close)
-                        //Reset lift
-                        .then(lift.setLevel(1))
-                        //Go into warehouse
-                        .then(drive.followTrajectory(drive.trajectoryBuilder()
-                                .splineTo(warehouseSpot, Math.toRadians(0.0))
-                                .build()
-                        ));
+                return Command.of(() -> {
+                    Trajectory t1 = drive.trajectoryBuilder()
+                            .splineTo(carouselSpot, Math.toRadians(180.0))
+                            .build();
+                    TrajectoryFollower follower = new TankPIDVAFollower(
+                            new PIDCoefficients(4, 0, 0.5),
+                            new PIDCoefficients(4, 0, 0.5),
+                            new Pose2d(0.5, 0.5, Math.toRadians(5)), 0.5
+                    );
+                    follower.followTrajectory(t1);
+                    DcMotor test = hMap.get(DcMotor.class, "back_right");
+                    DcMotor test2 = hMap.get(DcMotor.class, "front_right");
+                    do {
+                        drive.setDriveSignal(follower.update(drive.getPoseEstimate()));
+                        drive.update();
+//                        left.set(left.get() * 2);
+//                        right.set(right.get() * -1);
+                        TelemetryPacket pack = new TelemetryPacket();
+                        pack.put("reversed", Arrays.asList(left.isReversed(), right.isReversed()));
+                        pack.put("distance vel", new Vector2d(left.getDistanceVelocity(), right.getDistanceVelocity()));
+                        pack.put("encoders", new Vector2d(left.getCurrentPosition(), right.getCurrentPosition()));
+                        pack.put("pose", drive.getPoseEstimate());
+                        pack.put("dpp", left.getDistancePerPulse());
+                        DashboardUtil.drawRobot(pack.fieldOverlay(), drive.getPoseEstimate());
+                        dashboard.sendTelemetryPacket(pack);
+                    } while (follower.isFollowing());
+                    drive.setDriveSignal(new DriveSignal());
+                    drive.setDrivePower(new Pose2d());
+                    left.set(0.0);
+                    right.set(0.0);
+                    //Spin spinner
+                    spinner.start();
+                    new WaitCommand(spinnerSpinningDuration).run();
+                    spinner.stop();
+                    //Go to shipping hub
+                    Trajectory t2 = drive.trajectoryBuilder()
+                                    .back(26.322604207555816)
+                                    .splineTo(shippingHubSpot, Math.toRadians(-90.0))
+                                    .build();
+                    follower.followTrajectory(t2);
+                    do {
+                        drive.setDriveSignal(follower.update(drive.getPoseEstimate()));
+                        drive.update();
+//                        left.set(left.get() * 2);
+//                        right.set(right.get() * 2);
+//                        right.set(right.get() * -1);
+                        TelemetryPacket pack = new TelemetryPacket();
+                        pack.put("reversed", Arrays.asList(left.isReversed(), right.isReversed()));
+                        pack.put("encoders", new Vector2d(left.getCurrentPosition(), right.getCurrentPosition()));
+                        pack.put("pose", drive.getPoseEstimate());
+                        pack.put("dpp", left.getDistancePerPulse());
+                        DashboardUtil.drawRobot(pack.fieldOverlay(), drive.getPoseEstimate());
+                        dashboard.sendTelemetryPacket(pack);
+                    } while (follower.isFollowing());
+                    drive.setDriveSignal(new DriveSignal());
+                    drive.setDrivePower(new Pose2d());
+                    left.set(0.0);
+                    right.set(0.0);
+                    //Drop freight
+                    lift.setLevel(level).run();
+                    bucket.open();
+                    new WaitCommand(bucketOpenDuration).run();
+                    bucket.close();
+                    //Reset lift
+                    lift.setLevel(1).run();
+                    //Go into warehouse
+                    Trajectory t3 = drive.trajectoryBuilder()
+                                    .splineTo(warehouseSpot, Math.toRadians(0.0))
+                                    .build();
+                    follower.followTrajectory(t3);
+                    do {
+                        drive.setDriveSignal(follower.update(drive.getPoseEstimate()));
+                        drive.update();
+//                        left.set(left.get() * 2);
+//                        right.set(right.get() * 2);
+                        TelemetryPacket pack = new TelemetryPacket();
+                        pack.put("reversed", Arrays.asList(left.isReversed(), right.isReversed()));
+                        pack.put("distance vel", new Vector2d(left.getDistanceVelocity(), right.getDistanceVelocity()));
+                        pack.put("encoders", new Vector2d(left.getCurrentPosition(), right.getCurrentPosition()));
+                        pack.put("pose", drive.getPoseEstimate());
+                        pack.put("dpp", left.getDistancePerPulse());
+                        DashboardUtil.drawRobot(pack.fieldOverlay(), drive.getPoseEstimate());
+                        dashboard.sendTelemetryPacket(pack);
+                    } while (follower.isFollowing());
+                    drive.setDriveSignal(new DriveSignal());
+                    drive.setDrivePower(new Pose2d());
+                    left.set(0.0);
+                    right.set(0.0);
+                });
             }));
         }));
     }

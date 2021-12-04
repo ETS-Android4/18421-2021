@@ -9,6 +9,7 @@ import com.amarcolini.joos.hardware.Motor;
 public class Spinner implements Component {
     private final Motor motor;
     private boolean isActive = false;
+    public boolean reversed = false;
 
     public Spinner(Motor motor) {
         this.motor = motor;
@@ -16,7 +17,8 @@ public class Spinner implements Component {
     }
 
     public void start() {
-        motor.set(0.3);
+        if (reversed) motor.set(-0.3);
+        else motor.set(0.3);
         isActive = true;
     }
 

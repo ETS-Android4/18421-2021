@@ -93,7 +93,7 @@ public class DuckDetector extends OpenCvPipeline {
 		Imgproc.circle(pointSelectionOutput, location1, 10, new Scalar(255, 0, 0));
 		Imgproc.circle(pointSelectionOutput, location2, 10, new Scalar(0, 255, 0));
 		Imgproc.circle(pointSelectionOutput, location3, 10, new Scalar(0, 0, 255));
-		Imgproc.circle(pointSelectionOutput, new Point(duck.getX(), duck.getY()), 15, new Scalar(255, 255, 255), 3);
+		Imgproc.circle(pointSelectionOutput, new Point(duck.x, duck.y), 15, new Scalar(255, 255, 255), 3);
 
 		switch (mode) {
 			case THRESHOLD: return hslThresholdOutput;

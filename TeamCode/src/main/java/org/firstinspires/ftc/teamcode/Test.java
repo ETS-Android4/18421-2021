@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.amarcolini.joos.command.CommandScheduler;
 import com.amarcolini.joos.control.PIDCoefficients;
 import com.amarcolini.joos.hardware.Motor;
+import com.amarcolini.joos.hardware.MotorGroup;
 import com.amarcolini.joos.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,7 +19,7 @@ public class Test extends LinearOpMode {
     private Motor spinner;
     private Motor lift;
     private Servo bucket;
-    private Motor drive;
+    private MotorGroup drive;
 
     public static double intakeSpeed = 0.0;
     public static double conveyorSpeed = 0.0;
@@ -36,10 +37,16 @@ public class Test extends LinearOpMode {
         spinner = new Motor(hardwareMap, "spinner", 1620);
         lift = new Motor(hardwareMap, "lift", 312, 537.7);
         bucket = new Servo(hardwareMap, "bucket");
-        drive = new Motor(hardwareMap, 312, "front_left", "back_left", "front_right", "back_right");
+        drive = new MotorGroup(
+                new Motor(hardwareMap, "front_left", 312),
+                new Motor(hardwareMap, "back_left", 312),
+                new Motor(hardwareMap, "front_right", 312),
+                new Motor(hardwareMap, "back_right", 312)
+        );
+//        drive = new Motor(hardwareMap, 312, "front_left", "back_left", "front_right", "back_right");
         MultipleTelemetry telem = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
         
-        lift.setRunMode(Motor.RunMode.PositionControl);
+        lift.setRunMode(Motor.RunMode.RUN_TO_POSITION);
         lift.setTargetPosition(0);
         lift.setPositionCoefficients(liftCoefficients);
         lift.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -47,14 +54,14 @@ public class Test extends LinearOpMode {
         waitForStart();
 
         while(opModeIsActive()) {
-            intake.set(intakeSpeed);
-            conveyor.set(conveyorSpeed);
-            spinner.set(spinnerSpeed);
+            intake.setPower(intakeSpeed);
+            conveyor.setPower(conveyorSpeed);
+            spinner.setPower(spinnerSpeed);
             lift.setPositionCoefficients(liftCoefficients);
             lift.setTargetPosition(liftPosition);
-            lift.set(liftSpeed);
+            lift.setPower(liftSpeed);
             bucket.setPosition(bucketPosition);
-            drive.set(driveSpeed);
+            drive.setPower(driveSpeed);
             telem.addData("bucket position", bucket.getPosition());
             telem.addData("lift position", lift.getCurrentPosition());
             telem.update();

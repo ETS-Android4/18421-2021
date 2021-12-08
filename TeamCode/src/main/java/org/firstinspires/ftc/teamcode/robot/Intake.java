@@ -14,12 +14,12 @@ public class Intake implements Component {
     }
 
     public void start() {
-        motor.set(1.0);
+        motor.setPower(1.0);
         isActive = true;
     }
 
     public void stop() {
-        motor.set(0.0);
+        motor.setPower(0.0);
         isActive = false;
     }
 

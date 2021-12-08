@@ -5,15 +5,28 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.amarcolini.joos.command.Command;
 import com.amarcolini.joos.command.Robot;
+import com.amarcolini.joos.control.PIDCoefficients;
+import com.amarcolini.joos.drive.Drive;
+import com.amarcolini.joos.drive.DriveSignal;
 import com.amarcolini.joos.geometry.Pose2d;
 import com.amarcolini.joos.geometry.Vector2d;
+import com.amarcolini.joos.hardware.Imu;
 import com.amarcolini.joos.hardware.Motor;
+import com.amarcolini.joos.hardware.MotorGroup;
 import com.amarcolini.joos.hardware.Servo;
 import com.amarcolini.joos.hardware.drive.TankDrive;
 import com.amarcolini.joos.kinematics.TankKinematics;
+import com.amarcolini.joos.localization.Localizer;
+import com.amarcolini.joos.localization.TankLocalizer;
 import com.amarcolini.joos.trajectory.config.TankConstraints;
 import com.amarcolini.joos.util.DashboardUtil;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import java.util.Arrays;
+import java.util.List;
+
+import kotlin.jvm.functions.Function0;
 
 @Config
 public class FedEx extends Robot {
@@ -24,6 +37,7 @@ public class FedEx extends Robot {
     public final Bucket bucket;
     public final TankDrive drive;
     public final Camera camera;
+    public final Imu imu;
 
     //Config variables:
     /*
@@ -46,10 +60,18 @@ public class FedEx extends Robot {
         lift = new Lift(new Motor(hMap, "lift", 435, 384.5), this);
         bucket = new Bucket(new Servo(hMap, "bucket"));
         //Motors left and right both have a wheel radius set to 2.0 inches. Fix that if necessary.
-        Motor left = new Motor(hMap, 312.0, 2.0, 1.0, "front_left", "back_left");
+        MotorGroup left = new MotorGroup(
+                new Motor(hMap, "front_left", 312.0, 537.7, 2.0, 1.0),
+                new Motor(hMap, "back_left", 312.0, 537.7, 2.0, 1.0)
+        );
+        MotorGroup right = new MotorGroup(
+                new Motor(hMap, "front_right", 312.0, 537.7, 2.0, 1.0),
+                new Motor(hMap, "back_right", 312.0, 537.7, 2.0, 1.0)
+        );
         left.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        Motor right = new Motor(hMap, 312.0, 2.0, 1.0, "front_right", "back_right");
+//        left.setReversed(true);
         right.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        right.setReversed(true);
         //Drive constants are in here, so if trajectory following / location is off, look here
         /*
         These constants are the kind that roadrunner uses, but we haven't gone through the process
@@ -57,17 +79,53 @@ public class FedEx extends Robot {
         You can try measuring that if things aren't going well. You can also supply PID coefficients after the tank constraints
         if the trajectory following doesn't seem to be correcting itself too well, but the default values should be okay.
          */
+        imu = new Imu(hMap, "imu");
         drive = new TankDrive(
-                left, right, null,
+                right, left, null,
                 new TankConstraints(
-                        left.getMaxRPM(),
+                        left.maxRPM,
                         18.0,
-                        30.0,
+                        10.0,
                         30.0,
                         Math.toRadians(180.0),
                         Math.toRadians(180.0)
-                )
+                ), new PIDCoefficients(1, 0, 0), new PIDCoefficients(1, 0, 0)
         );
+
+//        drive.setLocalizer(new TankLocalizer(
+//                () -> Arrays.asList(left.getDistance(), right.getDistance()),
+//                () -> Arrays.asList(left.getDistance(), right.getDistance()),
+//                drive.getConstraints().getTrackWidth(), new Drive() {
+//                    private Localizer localizer = null;
+//
+//            @Override
+//            public void setDriveSignal(@NonNull DriveSignal driveSignal) {
+//                drive.setDriveSignal(driveSignal);
+//            }
+//
+//            @Override
+//            public void setDrivePower(@NonNull Pose2d pose2d) {
+//                drive.setDrivePower(pose2d);
+//            }
+//
+//            @Override
+//            protected double getRawExternalHeading() {
+//                return imu.getImu().getAngularOrientation().firstAngle;
+//            }
+//
+//            @Override
+//            public void setLocalizer(@NonNull Localizer localizer) {
+//                this.localizer = localizer;
+//            }
+//
+//            @NonNull
+//            @Override
+//            public Localizer getLocalizer() {
+//                return localizer;
+//            }
+//        }, true
+//        ));
+
         spinner = new Spinner(new Motor(hMap, "spinner", 1620));
         intake = new Intake(new Motor(hMap, "intake", 1620));
         conveyor = new Conveyor(new Motor(hMap, "conveyor", 1620));
@@ -122,8 +180,10 @@ public class FedEx extends Robot {
 //        spinner.reversed = true;
 
         //This should draw the robot's position on the field during autonomous.
-        schedule(Command.of(() ->
-                DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate()))
+        schedule(Command.of(() -> {
+                    DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate());
+                    dashboard.sendTelemetryPacket(getPacket());
+                })
                 .runUntil(false)
         );
 

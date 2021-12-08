@@ -7,18 +7,17 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.robot.FedEx;
 
 @Autonomous(name = "AutoBlueWarehouse Test")
-public class AutoTest extends LinearOpMode {
+public class AutoTest extends OpMode {
     private FedEx bot;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void init() {
         bot = new FedEx(this);
         bot.initAutoBlueWarehouse();
+    }
 
-        waitForStart();
-
-        for (int i = 0; i < 10; i++) {
-            bot.update();
-        }
+    @Override
+    public void loop() {
+        bot.update();
     }
 }

@@ -17,13 +17,13 @@ public class Spinner implements Component {
     }
 
     public void start() {
-        if (reversed) motor.set(-0.3);
-        else motor.set(0.3);
+        if (reversed) motor.setPower(-0.3);
+        else motor.setPower(0.3);
         isActive = true;
     }
 
     public void stop() {
-        motor.set(0.0);
+        motor.setPower(0.0);
         isActive = false;
     }
 

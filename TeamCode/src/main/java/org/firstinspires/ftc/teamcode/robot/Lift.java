@@ -25,8 +25,9 @@ public class Lift extends AbstractComponent {
     public Lift(Motor motor, Robot robot) {
         this.motor = motor;
         this.robot = robot;
-        motor.setRunMode(Motor.RunMode.PositionControl);
-        motor.set(0.0);
+        motor.setRunMode(Motor.RunMode.RUN_TO_POSITION);
+        motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        motor.setPower(0.0);
         motor.setPositionTolerance(50);
         motor.setPositionCoefficients(new PIDCoefficients(0.5, 0, 0));
         motor.resetEncoder();
@@ -55,9 +56,9 @@ public class Lift extends AbstractComponent {
         int finalNewPosition = newPosition;
         return Command.of(() -> {
             motor.setTargetPosition(finalNewPosition);
-            motor.setRunMode(Motor.RunMode.PositionControl);
+            motor.setRunMode(Motor.RunMode.RUN_TO_POSITION);
             motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-            motor.set(0.01);
+            motor.setPower(0.01);
             motor.update();
         })
                 .runUntil(() -> {
@@ -68,7 +69,7 @@ public class Lift extends AbstractComponent {
                 .isInterruptable(true)
                 .onEnd((command, interrupted) -> {
                     if (!interrupted) this.level = newLevel;
-                    motor.set(0);
+                    motor.setPower(0);
                 });
     }
 
@@ -76,7 +77,7 @@ public class Lift extends AbstractComponent {
         final CommandScheduler scheduler = getScheduler();
         if (scheduler != null)
         scheduler.cancel(scheduler.requiring(this));
-        motor.set(0.0);
+        motor.setPower(0.0);
     }
 
     public void reset() {

@@ -18,16 +18,18 @@ public class TurnTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
         waitForStart();
 
         if (isStopRequested()) return;
 
-        drive.followTrajectory(drive.trajectoryBuilder().turn(Math.toRadians(ANGLE)).build()).onExecute((cmd) -> {
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }).run();
+        drive.followTrajectory(drive.trajectoryBuilder().turn(Math.toRadians(ANGLE)).build())
+//                .onExecute((cmd) -> {
+//                    TelemetryPacket packet = new TelemetryPacket();
+//                    DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                    FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                })
+                .run();
     }
 }

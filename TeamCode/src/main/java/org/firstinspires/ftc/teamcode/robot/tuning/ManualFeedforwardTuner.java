@@ -67,7 +67,7 @@ public class ManualFeedforwardTuner extends LinearOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
-        drive = TuningBot.get(hardwareMap);
+        drive = new TuningBot(hardwareMap);
 
         mode = Mode.TUNING_MODE;
 
@@ -128,16 +128,16 @@ public class ManualFeedforwardTuner extends LinearOpMode {
                         profileStart = clock.seconds();
                     }
 
-                    drive.setDrivePower(new Pose2d(
+                    drive.setWeightedDrivePower(new Pose2d(
                             -gamepad1.left_stick_y,
                             -gamepad1.left_stick_x,
                             -gamepad1.right_stick_x
                     ));
                     break;
             }
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//            TelemetryPacket packet = new TelemetryPacket();
+//            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
             telemetry.update();
         }

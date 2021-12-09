@@ -35,7 +35,7 @@ public class TrackWidthTuner extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
         // TODO: if you haven't already, set the localizer to something that doesn't depend on
         //  drive encoders for computing the heading
 
@@ -67,9 +67,9 @@ public class TrackWidthTuner extends LinearOpMode {
                 headingAccumulator += Angle.norm(heading - lastHeading);
                 lastHeading = heading;
 
-                TelemetryPacket packet = new TelemetryPacket();
-                DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                TelemetryPacket packet = new TelemetryPacket();
+//                DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
                 turn.execute();
             }

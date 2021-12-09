@@ -34,7 +34,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
         NanoClock clock = NanoClock.system();
 
@@ -109,10 +109,10 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
             positionSamples.add(drive.getPoseEstimate().x);
             powerSamples.add(power);
 
-            drive.setDrivePower(new Pose2d(power, 0.0, 0.0));
+            drive.setWeightedDrivePower(new Pose2d(power, 0.0, 0.0));
             drive.updatePoseEstimate();
         }
-        drive.setDrivePower(new Pose2d(0.0, 0.0, 0.0));
+        drive.setWeightedDrivePower(new Pose2d(0.0, 0.0, 0.0));
 
         RegressionUtil.RampResult rampResult = RegressionUtil.fitRampData(
                 timeSamples, positionSamples, powerSamples, fitIntercept, null);
@@ -171,7 +171,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
             powerSamples.clear();
 
             drive.setPoseEstimate(new Pose2d());
-            drive.setDrivePower(new Pose2d(MAX_POWER, 0.0, 0.0));
+            drive.setWeightedDrivePower(new Pose2d(MAX_POWER, 0.0, 0.0));
 
             startTime = clock.seconds();
             while (!isStopRequested()) {
@@ -186,7 +186,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
 
                 drive.updatePoseEstimate();
             }
-            drive.setDrivePower(new Pose2d(0.0, 0.0, 0.0));
+            drive.setWeightedDrivePower(new Pose2d(0.0, 0.0, 0.0));
 
             RegressionUtil.AccelResult accelResult = RegressionUtil.fitAccelData(
                     timeSamples, positionSamples, powerSamples, rampResult, null);

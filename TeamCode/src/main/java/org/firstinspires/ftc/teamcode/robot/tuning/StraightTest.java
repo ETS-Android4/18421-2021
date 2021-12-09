@@ -23,7 +23,7 @@ public class StraightTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
         Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)
@@ -33,11 +33,13 @@ public class StraightTest extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        drive.followTrajectory(trajectory).onExecute((cmd) -> {
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }).run();
+        drive.followTrajectory(trajectory)
+//                .onExecute((cmd) -> {
+//                    TelemetryPacket packet = new TelemetryPacket();
+//                    DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                    FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                })
+                .run();
 
         Pose2d poseEstimate = drive.getPoseEstimate();
         telemetry.addData("finalX", poseEstimate.x);

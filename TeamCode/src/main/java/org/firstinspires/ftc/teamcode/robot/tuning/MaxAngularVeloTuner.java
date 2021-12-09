@@ -32,7 +32,7 @@ public class MaxAngularVeloTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
 //        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -49,15 +49,15 @@ public class MaxAngularVeloTuner extends LinearOpMode {
         telemetry.clearAll();
         telemetry.update();
 
-        drive.setDrivePower(new Pose2d(0, 0, 1));
+        drive.setWeightedDrivePower(new Pose2d(0, 0, 1));
         timer = new ElapsedTime();
 
         while (!isStopRequested() && timer.seconds() < RUNTIME) {
             drive.updatePoseEstimate();
 
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//            TelemetryPacket packet = new TelemetryPacket();
+//            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
             Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
 

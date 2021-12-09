@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class SplineTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
         waitForStart();
 
@@ -27,11 +27,13 @@ public class SplineTest extends LinearOpMode {
                 .splineTo(new Vector2d(30, 30), 0)
                 .build();
 
-        drive.followTrajectory(traj).onExecute((cmd) -> {
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }).run();
+        drive.followTrajectory(traj)
+//                .onExecute((cmd) -> {
+//                    TelemetryPacket packet = new TelemetryPacket();
+//                    DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                    FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                })
+                .run();
 
         sleep(2000);
 
@@ -39,10 +41,12 @@ public class SplineTest extends LinearOpMode {
                 drive.trajectoryBuilder(traj.end(), true)
                         .splineTo(new Vector2d(0, 0), Math.toRadians(180))
                         .build()
-        ).onExecute((cmd) -> {
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }).run();
+        )
+//                .onExecute((cmd) -> {
+//                    TelemetryPacket packet = new TelemetryPacket();
+//                    DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                    FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                })
+                .run();
     }
 }

@@ -34,7 +34,7 @@ public class BackAndForth extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)
@@ -47,16 +47,20 @@ public class BackAndForth extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
-            drive.followTrajectory(trajectoryForward).onExecute((cmd) -> {
-                TelemetryPacket packet = new TelemetryPacket();
-                DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
-            }).run();
-            drive.followTrajectory(trajectoryBackward).onExecute((cmd) -> {
-                TelemetryPacket packet = new TelemetryPacket();
-                DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
-            }).run();
+            drive.followTrajectory(trajectoryForward)
+//                    .onExecute((cmd) -> {
+//                        TelemetryPacket packet = new TelemetryPacket();
+//                        DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                    })
+                    .run();
+            drive.followTrajectory(trajectoryBackward)
+//                    .onExecute((cmd) -> {
+//                        TelemetryPacket packet = new TelemetryPacket();
+//                        DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                    })
+                    .run();
         }
     }
 }

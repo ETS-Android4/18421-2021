@@ -20,23 +20,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
 //        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
 
         while (!isStopRequested()) {
-            drive.setDrivePower(
+            drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,
                             -gamepad1.left_stick_x,
                             -gamepad1.right_stick_x
                     )
             );
-            TelemetryPacket packet = new TelemetryPacket();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//            TelemetryPacket packet = new TelemetryPacket();
+//            DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
             drive.update();
 

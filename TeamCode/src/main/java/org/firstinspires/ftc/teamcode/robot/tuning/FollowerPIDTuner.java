@@ -29,7 +29,7 @@ public class FollowerPIDTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        TankDrive drive = TuningBot.get(hardwareMap);
+        TankDrive drive = new TuningBot(hardwareMap);
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);
 
@@ -50,11 +50,13 @@ public class FollowerPIDTuner extends LinearOpMode {
                     .forward(DISTANCE)
                     .turn(Math.toRadians(90))
                     .build()
-            ).onExecute((cmd) -> {
-                TelemetryPacket packet = new TelemetryPacket();
-                DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
-            }).run();
+            )
+//                    .onExecute((cmd) -> {
+//                        TelemetryPacket packet = new TelemetryPacket();
+//                        DashboardUtil.drawRobot(packet.fieldOverlay(), drive.getPoseEstimate());
+//                        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//                    })
+                    .run();
         }
     }
 }

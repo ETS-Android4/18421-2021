@@ -174,18 +174,19 @@ public class FedEx extends Robot {
                 "reverse the spinner), drive to the shipping hub, drop the freight, and drive into the warehouse." +
                 "There should be dashboard variables to tweak these values.");
         DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate());
-        dashboard.sendTelemetryPacket(getPacket());
+//        dashboard.sendTelemetryPacket(getPacket());
+        sendPacket();
 
         //If spinner needs reversing:
 //        spinner.reversed = true;
 
         //This should draw the robot's position on the field during autonomous.
-        schedule(Command.of(() -> {
-                    DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate());
-                    dashboard.sendTelemetryPacket(getPacket());
-                })
-                .runUntil(false)
-        );
+//        schedule(Command.of(() -> {
+//                    DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate());
+//                    dashboard.sendTelemetryPacket(getPacket());
+//                })
+//                .runUntil(false)
+//        );
 
         schedule(Command.of(() -> {
             //After op mode starts:

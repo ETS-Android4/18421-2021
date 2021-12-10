@@ -1,20 +1,19 @@
 package org.firstinspires.ftc.teamcode.robot.opmode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.amarcolini.joos.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.DuckDetector;
 import org.firstinspires.ftc.teamcode.robot.FedEx;
 
-@Autonomous(name = "AutoBlueWarehouse Test")
-public class AutoTest extends OpMode {
+@TeleOp(name = "TeleOpBlue")
+public class TeleOpBlue extends OpMode {
     private FedEx bot;
 
     @Override
     public void init() {
         bot = new FedEx(this);
-        bot.initAutoBlueWarehouse();
+        bot.initTeleOp();
     }
 
     @Override

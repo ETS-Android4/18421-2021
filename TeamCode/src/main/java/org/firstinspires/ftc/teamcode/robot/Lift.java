@@ -17,14 +17,14 @@ import java.util.Set;
 
 public class Lift extends AbstractComponent {
     private final Motor motor;
-    private final Robot robot;
+//    private final Robot robot;
     private final int min = -880;
     private final int max = 0;
     private int level = 1;
 
-    public Lift(Motor motor, Robot robot) {
+    public Lift(Motor motor) {
         this.motor = motor;
-        this.robot = robot;
+//        this.robot = robot;
         motor.setRunMode(Motor.RunMode.RUN_TO_POSITION);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         motor.setPower(0.0);
@@ -87,7 +87,7 @@ public class Lift extends AbstractComponent {
     @Override
     public void update() {
         motor.update();
-        robot.telemetry.addData("position", motor.getCurrentPosition());
-        robot.telemetry.addData("target", motor.getTargetPosition());
+//        robot.telemetry.addData("position", motor.getCurrentPosition());
+//        robot.telemetry.addData("target", motor.getTargetPosition());
     }
 }

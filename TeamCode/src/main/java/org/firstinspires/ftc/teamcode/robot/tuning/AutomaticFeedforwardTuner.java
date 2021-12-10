@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.robot.tuning;
 
+import static org.firstinspires.ftc.teamcode.robot.tuning.TuningBot.GEAR_RATIO;
+import static org.firstinspires.ftc.teamcode.robot.tuning.TuningBot.WHEEL_RADIUS;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -85,7 +88,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
         telemetry.update();
 
         //TODO maxVel based on maxRPM?
-        double maxVel = drive.getConstraints().getMaxVel();
+        double maxVel = drive.getConstraints().getMaxRPM() * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
         double finalVel = MAX_POWER * maxVel;
         double accel = (finalVel * finalVel) / (2.0 * DISTANCE);
         double rampTime = Math.sqrt(2.0 * DISTANCE / accel);

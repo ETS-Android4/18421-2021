@@ -6,6 +6,7 @@ import com.amarcolini.joos.control.PIDFController;
 import com.amarcolini.joos.hardware.Imu;
 import com.amarcolini.joos.hardware.Motor;
 import com.amarcolini.joos.hardware.Servo;
+import com.amarcolini.joos.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -17,13 +18,12 @@ import org.firstinspires.ftc.teamcode.robot.Lift;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name = "Stinky Auto")
+@Autonomous(name = "RedWarehousePark")
 @Config
-public class StinkyAuto extends LinearOpMode {
+public class RedWarehousePark extends LinearOpMode {
     public static double GEAR_RATIO = 0.9;
     public static PIDCoefficients pid = new PIDCoefficients(0.05, 0, 0);
-    public static PIDCoefficients headingPID = new PIDCoefficients(0.5, 0, 0.2);
-    public static double DISTANCE = 50;
+    public static PIDCoefficients headingPID = new PIDCoefficients(0.5, 0, 0);
 
     private Motor back_left;
     private Motor front_left;
@@ -44,6 +44,7 @@ public class StinkyAuto extends LinearOpMode {
         back_right = new Motor(hardwareMap, "back_right", 312.0, 537.7, radius, GEAR_RATIO);
         imu = new Imu(hardwareMap, "imu");
         headingController = new PIDFController(headingPID);
+        headingController.setInputBounds(-Math.PI, Math.PI);
         imu.setAxis(Imu.Axis.Z);
         motors = Arrays.asList(back_right, back_left, front_right, front_left);
         front_right.setReversed(true);
@@ -58,16 +59,11 @@ public class StinkyAuto extends LinearOpMode {
 
         waitForStart();
 
-        straight(-15, 0.5);
-        lift.setLevel(3).run();
-        bucket.open();
-        Thread.sleep(2000);
-        bucket.close();
-        lift.setLevel(1).run();
-//        Thread.sleep(500);
-//        turn(90);
-//        Thread.sleep(500);
-//        straight(50);
+        straight(-12);
+        sleep(500);
+        turn(-90);
+        sleep(500);
+        straight(-43);
     }
 
     private void straight(double distance, double speed) {
@@ -98,11 +94,11 @@ public class StinkyAuto extends LinearOpMode {
             motor.setRunMode(Motor.RunMode.RUN_WITHOUT_ENCODER);
         }
         double start = imu.getHeading();
-        headingController.setTargetPosition(start + Math.toRadians(angle));
+        headingController.setTargetPosition(Angle.norm(start + Math.toRadians(angle)));
         headingController.setTolerance(Math.toRadians(10.0));
-        headingController.update(imu.getHeading());
-        while (!headingController.isAtSetPoint()) {
-            double output = headingController.update(imu.getHeading());
+        headingController.update(Angle.norm(imu.getHeading()));
+        while (Math.abs(headingController.getLastError()) < Math.toRadians(20.0)) {
+            double output = headingController.update(Angle.norm(imu.getHeading()));
             back_left.setPower(output);
             front_left.setPower(output);
             front_right.setPower(-output);

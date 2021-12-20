@@ -16,7 +16,7 @@ public class Bucket implements Component {
     }
 
     public void open() {
-        servo.setPosition(0.6);
+        servo.setPosition(0.58);
         isOpen = true;
     }
 

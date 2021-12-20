@@ -28,6 +28,10 @@ public class Intake implements Component {
         else start();
     }
 
+    public void reverse() {
+        motor.setPower(-1.0);
+    }
+
     public Boolean isActive() {
         return isActive;
     }

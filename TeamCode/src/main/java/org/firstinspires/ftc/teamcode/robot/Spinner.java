@@ -5,20 +5,21 @@ import androidx.annotation.Nullable;
 import com.amarcolini.joos.command.Command;
 import com.amarcolini.joos.command.Component;
 import com.amarcolini.joos.hardware.Motor;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Spinner implements Component {
-    private final Motor motor;
+    private final DcMotor motor;
     private boolean isActive = false;
     public boolean reversed = false;
 
-    public Spinner(Motor motor) {
+    public Spinner(DcMotor motor) {
         this.motor = motor;
-        motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void start() {
-        if (reversed) motor.setPower(-0.3);
-        else motor.setPower(0.3);
+        if (reversed) motor.setPower(-0.2);
+        else motor.setPower(0.2);
         isActive = true;
     }
 
@@ -38,6 +39,5 @@ public class Spinner implements Component {
 
     @Override
     public void update() {
-        motor.update();
     }
 }

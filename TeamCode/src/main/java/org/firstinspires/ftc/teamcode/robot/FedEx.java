@@ -23,6 +23,7 @@ import com.amarcolini.joos.trajectory.config.TankConstraints;
 import com.amarcolini.joos.util.DashboardUtil;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -65,18 +66,17 @@ public class FedEx extends Robot {
         //Motors left and right both have a wheel radius set to 2.0 inches. Fix that if necessary.
         left = new MotorGroup(
                 new Motor(hMap, "front_left", 312.0, 537.7, 2.4, 1.0),
-                new Motor(hMap, "back_left", 312.0, 537.7, 2.4, 1.0)
+                new Motor(hMap, "back_left", 312.0, 537.7, 2.4, 1.0).reversed()
         );
         right = new MotorGroup(
-                new Motor(hMap, "front_right", 312.0, 537.7, 2.4, 1.0),
+                new Motor(hMap, "front_right", 312.0, 537.7, 2.4, 1.0).reversed(),
                 new Motor(hMap, "back_right", 312.0, 537.7, 2.4, 1.0)
         );
         left.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 //        left.setReversed(true);
         right.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        right.setReversed(true);
-        left.setFeedforwardCoefficients(new FeedforwardCoefficients(0.3));
-        right.setFeedforwardCoefficients(new FeedforwardCoefficients(0.3));
+//        left.setFeedforwardCoefficients(new FeedforwardCoefficients(0.3));
+//        right.setFeedforwardCoefficients(new FeedforwardCoefficients(0.3));
         //Drive constants are in here, so if trajectory following / location is off, look here
         /*
         These constants are the kind that roadrunner uses, but we haven't gone through the process
@@ -132,7 +132,7 @@ public class FedEx extends Robot {
 //        }, true
 //        ));
 
-        spinner = new Spinner(new Motor(hMap, "spinner", 1620));
+        spinner = new Spinner(hMap.get(DcMotor.class, "spinner"));
         intake = new Intake(new Motor(hMap, "intake", 1620));
         conveyor = new Conveyor(new Motor(hMap, "conveyor", 1620));
         camera = new Camera("webcam", this);
@@ -148,7 +148,7 @@ public class FedEx extends Robot {
                     new Pose2d(
                             -stick.y,
                             0,
-                            -stick.x * 2
+                            stick.x * 1.5
                     )
             );
 //            Pose2d vel = new Pose2d(
@@ -159,17 +159,29 @@ public class FedEx extends Robot {
 //            drive.setDrivePower(vel);
         }).requires(drive).runUntil(false));
 
-        map(gamepad.p1.a::justActivated, Command.select(() -> {
+        map(() -> gamepad.p1.a.justActivated() && !(intake.isActive() || conveyor.isActive()), Command.select(() -> {
             int newLevel = lift.getLevel() + 1;
             if (newLevel > 3) newLevel = 1;
             return lift.setLevel(newLevel);
         }).requires(lift));
         map(() -> gamepad.p1.b.justActivated() && requiring(lift) == null, bucket::toggle);
-        map(gamepad.p1.x::justActivated, () -> {
+        map(() -> gamepad.p1.x.justActivated() && lift.getLevel() == 1, Command.of(() -> {
             intake.toggle();
             conveyor.toggle();
-        });
+        }).requires(intake, conveyor));
         map(gamepad.p1.y::justActivated, spinner::toggle);
+        map(gamepad.p1.left_bumper::justActivated, Command.of(() -> {
+            intake.reverse();
+            conveyor.reverse();
+        })
+                .requires(intake, conveyor)
+                .runUntil(() -> !gamepad.p1.left_bumper.isActive())
+                .onEnd((cmd, interrupted) -> {
+            if (intake.isActive()) intake.start();
+            else intake.stop();
+            if (conveyor.isActive()) conveyor.start();
+            else conveyor.stop();
+        }));
     }
 
     public void initAutoBlueWarehouse() {

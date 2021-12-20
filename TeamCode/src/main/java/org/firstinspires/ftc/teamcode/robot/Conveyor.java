@@ -33,6 +33,10 @@ public class Conveyor implements Component {
         return isActive;
     }
 
+    public void reverse() {
+        motor.setPower(-1.0);
+    }
+
     @Override
     public void update() {
         motor.update();

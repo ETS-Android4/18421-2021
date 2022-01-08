@@ -2,8 +2,6 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.8">
-      <module name="18421-2021.FtcRobotController" target="11" />
-      <module name="18421-2021.TeamCode" target="11" />
       <module name="18421-2021.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>

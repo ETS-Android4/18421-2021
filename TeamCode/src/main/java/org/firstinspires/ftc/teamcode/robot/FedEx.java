@@ -43,13 +43,6 @@ public class FedEx extends Robot {
     public final MotorGroup right;
     public final Imu imu;
 
-    //Config variables:
-    /*
-    If you're having trouble visualizing the positions or dashboard isn't displaying these properly,
-    know that positive x is towards the warehouse, and positive y is towards the blue side. (0, 0)
-    is the center of the field.
-    Additionally, there is a joos_testing module in the code, if you want to try out the GUI. It might not work.
-     */
     public static Pose2d start = new Pose2d(-39.00, 62.40, -1.57080);
     public static Double bucketOpenDuration = 2.0;
     public static Double spinnerSpinningDuration = 2.0;
@@ -189,13 +182,7 @@ public class FedEx extends Robot {
         camera.start();
         //Setting pose estimate
         drive.setPoseEstimate(start);
-        getPacket().addLine("This opmode is a test autonomous.");
-        getPacket().addLine("The robot should be against the wall behind the barcode nearest to the " +
-                "carousel and aligned on the nearest field tile. The camera should be facing the barcode");
-        getPacket().addLine("The robot should drive to the carousel, activate the spinner (if it's the wrong direction, " +
-                "reverse the spinner), drive to the shipping hub, drop the freight, and drive into the warehouse." +
-                "There should be dashboard variables to tweak these values.");
-        DashboardUtil.drawRobot(getPacket().fieldOverlay(), drive.getPoseEstimate());
+        DashboardUtil.drawRobot(drive.getPoseEstimate(), "blue");
 //        dashboard.sendTelemetryPacket(getPacket());
         sendPacket();
 
@@ -254,5 +241,15 @@ public class FedEx extends Robot {
                         ));
             }));
         }));
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void start() {
+
     }
 }

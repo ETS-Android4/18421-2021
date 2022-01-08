@@ -29,7 +29,7 @@ public class Lift extends AbstractComponent {
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         motor.setPower(0.0);
         motor.setPositionTolerance(50);
-        motor.setPositionCoefficients(new PIDCoefficients(0.5, 0, 0));
+        motor.setPositionCoefficients(new PIDCoefficients(5, 0.1, 0));
         motor.resetEncoder();
         motor.setTargetPosition(0);
     }
@@ -58,7 +58,7 @@ public class Lift extends AbstractComponent {
             motor.setTargetPosition(finalNewPosition);
             motor.setRunMode(Motor.RunMode.RUN_TO_POSITION);
             motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-            motor.setPower(0.01);
+            motor.setPower(1.0);
             motor.update();
         })
                 .runUntil(() -> {

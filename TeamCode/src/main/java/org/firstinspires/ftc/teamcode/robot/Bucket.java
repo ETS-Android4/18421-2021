@@ -12,16 +12,16 @@ public class Bucket implements Component {
 
     public Bucket(Servo servo) {
         this.servo = servo;
-        servo.setPosition(0.0);
+        servo.setPosition(0.1);
     }
 
     public void open() {
-        servo.setPosition(0.4);
+        servo.setPosition(0.5);
         isOpen = true;
     }
 
     public void close() {
-        servo.setPosition(0.0);
+        servo.setPosition(0.1);
         isOpen = false;
     }
 

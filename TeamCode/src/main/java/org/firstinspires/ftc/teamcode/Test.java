@@ -62,6 +62,7 @@ public class Test extends LinearOpMode {
             lift.setPower(liftSpeed);
             bucket.setPosition(bucketPosition);
             drive.setPower(driveSpeed);
+            lift.update();
             telem.addData("bucket position", bucket.getPosition());
             telem.addData("lift position", lift.getCurrentPosition());
             telem.update();

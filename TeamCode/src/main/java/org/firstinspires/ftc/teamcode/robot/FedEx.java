@@ -137,11 +137,11 @@ public class FedEx extends Robot {
         schedule(Command.of(() -> {
             Vector2d stick = gamepad.p1.getLeftStick();
             telemetry.addData("stick", stick);
-            drive.setDrivePower(
+            drive.setWeightedDrivePower(
                     new Pose2d(
                             -stick.y,
                             0,
-                            stick.x * 1.5
+                            stick.x
                     )
             );
 //            Pose2d vel = new Pose2d(
